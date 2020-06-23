@@ -237,14 +237,14 @@ resource "azurerm_storage_container" "default" {
 #########################################################  
 resource "azurerm_resource_group" "azlb" {
   name     = "${var.resource_group_name}"
-  location = "${var.location}"
+  location = "${var.azure_region}"
   tags     = "${var.tags}"
 }
 
 resource "azurerm_public_ip" "azlb" {
   count                        = "${var.type == "public" ? 1 : 0}"
   name                         = "${var.prefix}-publicIP"
-  location                     = "${var.location}"
+  location                     = "${var.azure_region}"
   resource_group_name          = "${azurerm_resource_group.azlb.name}"
   public_ip_address_allocation = "${var.public_ip_address_allocation}"
   tags                         = "${var.tags}"
@@ -253,7 +253,7 @@ resource "azurerm_public_ip" "azlb" {
 resource "azurerm_lb" "azlb" {
   name                = "${var.prefix}-lb"
   resource_group_name = "${azurerm_resource_group.azlb.name}"
-  location            = "${var.location}"
+  location            = "${var.azure_region}"
   tags                = "${var.tags}"
 
   frontend_ip_configuration {
