@@ -56,7 +56,7 @@
         "name": "name_prefix",
         "label": "Prefix of Resource Names",
         "description": "Prefix of names for Azure resources; The name prefix must be 1-52 alphanumeric characters and dash",
-        "default": "lamp",
+        "default": "azure",
         "hidden": false,
         "immutable": false,
         "required": true,
@@ -175,13 +175,6 @@
       "secured": false,
       "hidden": false
     },      
-    {
-      "name": "lamp_sql_service_fqdn",
-      "type": "string",
-      "label": "SQL Service FQDN",
-      "secured": false,
-      "hidden": false
-    },  
     {
       "name": "application_url",
       "type": "url",
