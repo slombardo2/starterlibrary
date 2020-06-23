@@ -27,9 +27,9 @@ provider "azurerm" {
 #########################################################
 # Helper module for tagging
 #########################################################
-module "camtags" {
-  source = "../Modules/camtags"
-}
+#module "camtags" {
+#  source = "../Modules/camtags"
+#}
 
 #########################################################
 # Define the variables
@@ -142,7 +142,7 @@ resource "random_id" "default" {
 resource "azurerm_resource_group" "default" {
   name     = "${var.name_prefix}-${random_id.default.hex}-rg"
   location = "${var.azure_region}"
-  tags     = "${module.camtags.tagsmap}"
+#  tags     = "${module.camtags.tagsmap}"
 }
 
 resource "azurerm_virtual_network" "default" {
@@ -164,14 +164,14 @@ resource "azurerm_public_ip" "web" {
   location                     = "${var.azure_region}"
   resource_group_name          = "${azurerm_resource_group.default.name}"
   allocation_method 		   = "Static"
-  tags                         = "${module.camtags.tagsmap}"
+#  tags                         = "${module.camtags.tagsmap}"
 }
 
 resource "azurerm_network_security_group" "web" {
   name                = "${var.name_prefix}-${random_id.default.hex}-web-nsg"
   location            = "${var.azure_region}"
   resource_group_name = "${azurerm_resource_group.default.name}"
-  tags                = "${module.camtags.tagsmap}"
+#  tags                = "${module.camtags.tagsmap}"
 
   security_rule {
     name                       = "ssh-allow"
@@ -203,7 +203,7 @@ resource "azurerm_network_interface" "web" {
   location                  = "${var.azure_region}"
   resource_group_name       = "${azurerm_resource_group.default.name}"
   network_security_group_id = "${azurerm_network_security_group.web.id}"
-  tags                      = "${module.camtags.tagsmap}"
+#  tags                      = "${module.camtags.tagsmap}"
 
   ip_configuration {
     name                          = "${var.name_prefix}-${random_id.default.hex}-web-nic1-ipc"
@@ -223,7 +223,7 @@ resource "azurerm_storage_account" "default" {
   account_tier        		= "Standard"  
   account_replication_type  = "LRS"
   
-  tags                = "${module.camtags.tagsmap}"
+#  tags                = "${module.camtags.tagsmap}"
   
 }
 
@@ -321,7 +321,7 @@ resource "azurerm_virtual_machine" "web" {
   resource_group_name   = "${azurerm_resource_group.default.name}"
   network_interface_ids = ["${azurerm_network_interface.web.id}"]
   vm_size               = "Standard_A2"
-  tags                  = "${module.camtags.tagsmap}"
+#  tags                  = "${module.camtags.tagsmap}"
 
   storage_image_reference {
     publisher = "Canonical"
@@ -360,7 +360,7 @@ resource "azurerm_virtual_machine" "web-alternative" {
   resource_group_name   = "${azurerm_resource_group.default.name}"
   network_interface_ids = ["${azurerm_network_interface.web.id}"]
   vm_size               = "Standard_A2"
-  tags                  = "${module.camtags.tagsmap}"
+#  tags                  = "${module.camtags.tagsmap}"
 
   storage_image_reference {
     publisher = "Canonical"
@@ -397,7 +397,7 @@ resource "azurerm_sql_server" "db" {
   version                      = "12.0"
   administrator_login          = "${var.admin_user}"
   administrator_login_password = "${var.admin_user_password}"
-  tags                         = "${module.camtags.tagsmap}"
+#  tags                         = "${module.camtags.tagsmap}"
 }
 
 resource "azurerm_sql_database" "db" {
@@ -405,7 +405,7 @@ resource "azurerm_sql_database" "db" {
   resource_group_name = "${azurerm_resource_group.default.name}"
   location            = "${var.azure_region}"
   server_name         = "${azurerm_sql_server.db.name}"
-  tags                = "${module.camtags.tagsmap}"
+#  tags                = "${module.camtags.tagsmap}"
 }
 
 resource "azurerm_sql_firewall_rule" "db" {
