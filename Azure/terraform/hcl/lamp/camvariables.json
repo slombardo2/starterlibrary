@@ -1,186 +1,545 @@
 {
   "terraform_version": "~> 0.11.0",
-  "input_datatypes": [
+  "input_datatypes": [  {
+    "name": "bastionhost",
+    "label": "Bastion Data"
+  } ],
+  "input_namespaces": [ ],
+  "output_namespace": "",
+  "input_groups": [
     {
-      "name": "bastionhost",
-      "label": "Bastion Data"
-    }    
+      "name": "Globals",
+      "label": "Globals"
+    },
+    {
+      "name": "Networking",
+      "label": "Networking"
+    },
+    {
+      "name": "Instances",
+      "label": "Instances"
+    },
+    {
+      "name": "Balancing",
+      "label": "Balancing"
+    },
+    {
+      "name": "Balancing-azurerm_lb.azlb",
+      "label": "Balancing - azurerm_lb.azlb"
+    },
+    {
+      "name": "Other",
+      "label": "Other"
+    },
+    {
+      "name": "Other-null_resource.install_php",
+      "label": "Other - null_resource.install_php"
+    }
   ],
+  "output_groups": [ ],
   "template_input_params": [
     {
-        "name": "azure_region",
-        "label": "Azure Region",
-        "description": "Azure region to deploy infrastructure resources",
-        "hidden": false,
-        "immutable": false,
-        "required": true,
-        "secured": false,
-        "type": "string",
-        "options": [
-          {
-              "value": "West US",
-              "label": "West US",
-              "default": "true"
-          },
-          {
-              "value": "West US 2",
-              "label": "West US 2"
-          },
-          {
-              "value": "East US",
-              "label": "East US"
-          },
-          {
-              "value": "East US",
-              "label": "East US 2"
-          },
-          {
-              "value": "Central US",
-              "label": "Central US"
-          },
-          {
-              "value": "North Central US",
-              "label": "North Central US"
-          },
-          {
-              "value": "South Central US",
-              "label": "South Central US"
-          },
-          {
-              "value": "West Central US",
-              "label": "West Central US"
-          }
-        ]
-    },
-    {
-        "name": "name_prefix",
-        "label": "Prefix of Resource Names",
-        "description": "Prefix of names for Azure resources; The name prefix must be 1-52 alphanumeric characters and dash",
-        "default": "azure",
-        "hidden": false,
-        "immutable": false,
-        "required": true,
-        "secured": false,
-        "type": "string",
-        "regex": "^[A-Za-z0-9-]{1,52}$"
-    },
-    {
-        "name": "admin_user",
-        "label": "Admin User to Access Virtual Machines",
-        "description": "Name of an administrative user to be created in virtual machine and SQL service in this deployment; The user name must be 1-32 alphanumeric (with beginning at letters) and special characters including -._",
-        "default": "ibmadmin",
-        "hidden": false,
-        "immutable": false,
-        "required": true,
-        "secured": false,
-        "type": "string",
-        "regex": "^[A-Za-z0-9][A-Za-z0-9-._]{0,31}$"
-    },
-    {
-        "name": "admin_user_password",
-        "label": "Admin User Password",
-        "description": "Password of the newly created administrative user; The supplied password must be between 8-72 characters long, must not contain user name, and must satisfy at least 3 of password complexity requirements from the following: 1) Contains an uppercase character; 2) Contains a lowercase character; 3) Contains a numeric digit; 4) Contains a special character in exclamation point (!), dollar sign ($), number sign (#), or percent (%)",
-        "hidden": false,
-        "immutable": false,
-        "required": true,
-        "secured": true,
-        "type": "password",
-        "regex": "^[A-Za-z0-9!$#%]{8,72}$"
-    },
-    {
-        "name": "user_public_key",
-        "label": "User Public Key",
-        "description": "User-provided public SSH key used to connect to the virtual machine; The provided key must be 'None' or the openSSH format key with optional comment",
-        "default": "None",
-        "hidden": false,
-        "immutable": false,
-        "required": true,
-        "secured": false,
-        "type": "string",
-        "regex": "^None$|^ssh-rsa AAAA[0-9A-Za-z+/]+[=]{0,3}( [^@]+@[^@]+| [^@]+){0,1}$"
-    },
-    {
       "name": "bastion_host",
-      "type": "string",
-      "hidden": true,
-      "description": "Bastion host for ssh proxy",
-      "default": "${bastionhost.bastion_host}",
       "label": "Bastion host",
-      "secured": false,
-      "required": false
-    },
-    {
-      "name": "bastion_port",
+      "description": "Bastion host for ssh proxy",
       "type": "string",
-      "hidden": true,
-      "description": "Bastion port for ssh proxy",
-      "default": "${bastionhost.bastion_port}",
-      "label": "Bastion port",
+      "default": "${bastionhost.bastion_host}",
+      "regex": "",
+      "group_name": "Other-null_resource.install_php",
+      "required": false,
       "secured": false,
-      "required": false
+      "hidden": true,
+      "immutable": false,
+      "immutable_after_create": false
     },
     {
       "name": "bastion_user",
-      "type": "string",
-      "hidden": true,
-      "description": "Bastion user for ssh proxy",
-      "default": "${bastionhost.bastion_user}",
       "label": "Bastion user",
+      "description": "Bastion user for ssh proxy",
+      "type": "string",
+      "default": "${bastionhost.bastion_user}",
+      "regex": "",
+      "group_name": "Other-null_resource.install_php",
+      "required": false,
       "secured": false,
-      "required": false
+      "hidden": true,
+      "immutable": false,
+      "immutable_after_create": false
     },
     {
       "name": "bastion_private_key",
-      "type": "string",
-      "hidden": true,
-      "description": "Bastion private key for ssh proxy",
-      "default": "${bastionhost.bastion_private_key}",
       "label": "Bastion private key",
+      "description": "Bastion private key for ssh proxy",
+      "type": "string",
+      "default": "${bastionhost.bastion_private_key}",
+      "regex": "",
+      "group_name": "Other-null_resource.install_php",
+      "required": false,
       "secured": true,
-      "required": false
+      "hidden": true,
+      "immutable": false,
+      "immutable_after_create": false
     },
     {
-      "name": "bastion_password",
+      "name": "bastion_port",
+      "label": "Bastion port",
+      "description": "Bastion port for ssh proxy",
       "type": "string",
+      "default": "${bastionhost.bastion_port}",
+      "regex": "",
+      "group_name": "Other-null_resource.install_php",
+      "required": false,
+      "secured": false,
       "hidden": true,
-      "description": "Bastion user password for ssh proxy",
-      "default": "${bastionhost.bastion_password}",
-      "label": "Bastion user password",
-      "secured": true,
-      "required": false
+      "immutable": false,
+      "immutable_after_create": false
     },
     {
       "name": "bastion_host_key",
-      "type": "string",
-      "hidden": true,
-      "description": "Bastion host public key for ssh proxy",
-      "default": "${bastionhost.bastion_host_key}",
       "label": "Bastion host key",
+      "description": "Bastion host public key for ssh proxy",
+      "type": "string",
+      "default": "${bastionhost.bastion_host_key}",
+      "regex": "",
+      "group_name": "Other-null_resource.install_php",
+      "required": false,
       "secured": false,
-      "required": false
+      "hidden": true,
+      "immutable": false,
+      "immutable_after_create": false
+    },
+    {
+      "name": "bastion_password",
+      "label": "Bastion user password",
+      "description": "Bastion user password for ssh proxy",
+      "type": "string",
+      "default": "${bastionhost.bastion_password}",
+      "regex": "",
+      "group_name": "Other-null_resource.install_php",
+      "required": false,
+      "secured": true,
+      "hidden": true,
+      "immutable": false,
+      "immutable_after_create": false
+    },
+    {
+      "name": "azure_region",
+      "label": "Azure Region",
+      "description": "Azure region to deploy infrastructure resources",
+      "type": "string",
+      "default": "West US",
+      "regex": "",
+      "group_name": "Globals",
+      "required": true,
+      "secured": false,
+      "hidden": false,
+      "immutable": false,
+      "immutable_after_create": false,
+      "options": [
+        {
+          "value": "West US",
+          "label": "West US",
+          "default": "true"
+        },
+        {
+          "value": "West US 2",
+          "label": "West US 2"
+        },
+        {
+          "value": "East US",
+          "label": "East US"
+        },
+        {
+          "value": "East US",
+          "label": "East US 2"
+        },
+        {
+          "value": "Central US",
+          "label": "Central US"
+        },
+        {
+          "value": "North Central US",
+          "label": "North Central US"
+        },
+        {
+          "value": "South Central US",
+          "label": "South Central US"
+        },
+        {
+          "value": "West Central US",
+          "label": "West Central US"
+        }
+      ]
+    },
+    {
+      "name": "name_prefix",
+      "label": "Prefix of Resource Names",
+      "description": "Prefix of names for Azure resources",
+      "type": "string",
+      "default": "azurelb",
+      "regex": "^[A-Za-z0-9-]{1,52}$",
+      "group_name": "Globals",
+      "required": true,
+      "secured": false,
+      "hidden": false,
+      "immutable": false,
+      "immutable_after_create": false
+    },
+    {
+      "name": "admin_user",
+      "label": "Admin User to Access Virtual Machines",
+      "description": "Name of an administrative user to be created in virtual machine and SQL service in this deployment",
+      "type": "string",
+      "default": "ibmadmin",
+      "regex": "^[A-Za-z0-9][A-Za-z0-9-._]{0,31}$",
+      "group_name": "Globals",
+      "required": true,
+      "secured": false,
+      "hidden": false,
+      "immutable": false,
+      "immutable_after_create": false
+    },
+    {
+      "name": "admin_user_password",
+      "label": "Admin User Password",
+      "description": "Password of the newly created administrative user",
+      "type": "password",
+      "default": "",
+      "regex": "^[A-Za-z0-9!$#%]{8,72}$",
+      "group_name": "Globals",
+      "required": true,
+      "secured": true,
+      "hidden": false,
+      "immutable": false,
+      "immutable_after_create": false
+    },
+    {
+      "name": "user_public_key",
+      "label": "User Public Key",
+      "description": "Public SSH key used to connect to the virtual machine",
+      "type": "string",
+      "default": "None",
+      "regex": "^None$|^ssh-rsa AAAA[0-9A-Za-z+/]+[=]{0,3}( [^@]+@[^@]+| [^@]+){0,1}$",
+      "group_name": "Instances",
+      "required": true,
+      "secured": false,
+      "hidden": false,
+      "immutable": false,
+      "immutable_after_create": false
+    },
+    {
+      "name": "resource_group_name",
+      "label": "Resource Group Name",
+      "description": "(Required) The name of the resource group where the load balancer resources will be placed.",
+      "type": "string",
+      "default": "azure_lb-rg",
+      "regex": "",
+      "group_name": "Other",
+      "required": true,
+      "secured": false,
+      "hidden": false,
+      "immutable": false,
+      "immutable_after_create": false
+    },
+    {
+      "name": "prefix",
+      "label": "Prefix",
+      "description": "(Required) Default prefix to use with your resource names.",
+      "type": "string",
+      "default": "azure_lb",
+      "regex": "",
+      "group_name": "Globals",
+      "required": true,
+      "secured": false,
+      "hidden": false,
+      "immutable": false,
+      "immutable_after_create": false
+    },
+    {
+      "name": "remote_port",
+      "label": "Remote Port",
+      "description": "Protocols to be used for remote vm access. [protocol, backend_port].  Frontend port will be automatically generated starting at 50000 and in the output.",
+      "type": "map",
+      "default": {  },
+      "regex": "",
+      "group_name": "Balancing",
+      "required": true,
+      "secured": false,
+      "hidden": false,
+      "immutable": false,
+      "immutable_after_create": false
+    },
+    {
+      "name": "lb_port",
+      "label": "Lb Port",
+      "description": "Protocols to be used for lb health probes and rules. [frontend_port, protocol, backend_port]",
+      "type": "map",
+      "default": {  },
+      "regex": "",
+      "group_name": "Globals",
+      "required": true,
+      "secured": false,
+      "hidden": false,
+      "immutable": false,
+      "immutable_after_create": false
+    },
+    {
+      "name": "lb_probe_unhealthy_threshold",
+      "label": "Lb Probe Unhealthy Threshold",
+      "description": "Number of times the load balancer health probe has an unsuccessful attempt before considering the endpoint unhealthy.",
+      "type": "string",
+      "default": "2",
+      "regex": "",
+      "group_name": "Balancing",
+      "required": true,
+      "secured": false,
+      "hidden": false,
+      "immutable": false,
+      "immutable_after_create": false
+    },
+    {
+      "name": "lb_probe_interval",
+      "label": "Lb Probe Interval",
+      "description": "Interval in seconds the load balancer health probe rule does a check",
+      "type": "string",
+      "default": "5",
+      "regex": "",
+      "group_name": "Balancing",
+      "required": true,
+      "secured": false,
+      "hidden": false,
+      "immutable": false,
+      "immutable_after_create": false
+    },
+    {
+      "name": "frontend_name",
+      "label": "Frontend Name",
+      "description": "(Required) Specifies the name of the frontend ip configuration.",
+      "type": "string",
+      "default": "myPublicIP",
+      "regex": "",
+      "group_name": "Globals",
+      "required": true,
+      "secured": false,
+      "hidden": false,
+      "immutable": false,
+      "immutable_after_create": false
+    },
+    {
+      "name": "public_ip_address_allocation",
+      "label": "Public Ip Address Allocation",
+      "description": "(Required) Defines how an IP address is assigned. Options are Static or Dynamic.",
+      "type": "string",
+      "default": "static",
+      "regex": "",
+      "group_name": "Networking",
+      "required": true,
+      "secured": false,
+      "hidden": false,
+      "immutable": false,
+      "immutable_after_create": false
+    },
+    {
+      "name": "tags",
+      "label": "Tags",
+      "description": "null",
+      "type": "map",
+      "default": { "source": "terraform" },
+      "regex": "",
+      "group_name": "Globals",
+      "required": true,
+      "secured": false,
+      "hidden": false,
+      "immutable": false,
+      "immutable_after_create": false
+    },
+    {
+      "name": "type",
+      "label": "Type",
+      "description": "(Optional) Defined if the loadbalancer is private or public",
+      "type": "string",
+      "default": "public",
+      "regex": "",
+      "group_name": "Globals",
+      "required": true,
+      "secured": false,
+      "hidden": false,
+      "immutable": false,
+      "immutable_after_create": false
+    },
+    {
+      "name": "frontend_subnet_id",
+      "label": "Frontend Subnet Id",
+      "description": "(Optional) Frontend subnet id to use when in private mode",
+      "type": "string",
+      "default": "",
+      "regex": "",
+      "group_name": "Balancing-azurerm_lb.azlb",
+      "required": true,
+      "secured": false,
+      "hidden": false,
+      "immutable": false,
+      "immutable_after_create": false
+    },
+    {
+      "name": "frontend_private_ip_address",
+      "label": "Frontend Private Ip Address",
+      "description": "(Optional) Private ip address to assign to frontend. Use it with type = private",
+      "type": "string",
+      "default": "",
+      "regex": "",
+      "group_name": "Balancing-azurerm_lb.azlb",
+      "required": true,
+      "secured": false,
+      "hidden": false,
+      "immutable": false,
+      "immutable_after_create": false
+    },
+    {
+      "name": "frontend_private_ip_address_allocation",
+      "label": "Frontend Private Ip Address Allocation",
+      "description": "(Optional) Frontend ip allocation type (Static or Dynamic)",
+      "type": "string",
+      "default": "Dynamic",
+      "regex": "",
+      "group_name": "Balancing-azurerm_lb.azlb",
+      "required": true,
+      "secured": false,
+      "hidden": false,
+      "immutable": false,
+      "immutable_after_create": false
     }
   ],
   "template_output_params": [
     {
       "name": "lamp_web_vm_public_ip",
-      "type": "string",
       "label": "Web VM Public IP",
+      "description": "null",
+      "group_name": "",
       "secured": false,
-      "hidden": false
-    },      
+      "hidden": false,
+      "shortname": "",
+      "type": "string"
+    },
     {
       "name": "lamp_web_vm_private_ip",
-      "type": "string",
       "label": "Web VM Private IP",
+      "description": "null",
+      "group_name": "",
       "secured": false,
-      "hidden": false
-    },      
+      "hidden": false,
+      "shortname": "",
+      "type": "string"
+    },
+    {
+      "name": "lamp_sql_service_fqdn",
+      "label": "Lamp Sql Service Fqdn",
+      "description": "null",
+      "group_name": "",
+      "secured": false,
+      "hidden": false,
+      "shortname": "",
+      "type": "string"
+    },
     {
       "name": "application_url",
-      "type": "url",
       "label": "Sample Application URL",
+      "description": "null",
+      "group_name": "",
       "secured": false,
-      "hidden": false
-    }  
+      "hidden": false,
+      "shortname": "",
+      "type": "url"
+    },
+    {
+      "name": "azurerm_resource_group_tags",
+      "label": "Azurerm Resource Group Tags",
+      "description": "the tags provided for the resource group",
+      "group_name": "",
+      "secured": false,
+      "hidden": false,
+      "shortname": "",
+      "type": "string"
+    },
+    {
+      "name": "azurerm_resource_group_name",
+      "label": "Azurerm Resource Group Name",
+      "description": "name of the resource group provisioned",
+      "group_name": "",
+      "secured": false,
+      "hidden": false,
+      "shortname": "",
+      "type": "string"
+    },
+    {
+      "name": "azurerm_lb_id",
+      "label": "Azurerm Lb Id",
+      "description": "the id for the azurerm_lb resource",
+      "group_name": "",
+      "secured": false,
+      "hidden": false,
+      "shortname": "",
+      "type": "string"
+    },
+    {
+      "name": "azurerm_lb_frontend_ip_configuration",
+      "label": "Azurerm Lb Frontend Ip Configuration",
+      "description": "the frontend_ip_configuration for the azurerm_lb resource",
+      "group_name": "",
+      "secured": false,
+      "hidden": false,
+      "shortname": "",
+      "type": "string"
+    },
+    {
+      "name": "azurerm_lb_probe_ids",
+      "label": "Azurerm Lb Probe Ids",
+      "description": "the ids for the azurerm_lb_probe resources",
+      "group_name": "",
+      "secured": false,
+      "hidden": false,
+      "shortname": "",
+      "type": "string"
+    },
+    {
+      "name": "azurerm_lb_nat_rule_ids",
+      "label": "Azurerm Lb Nat Rule Ids",
+      "description": "the ids for the azurerm_lb_nat_rule resources",
+      "group_name": "",
+      "secured": false,
+      "hidden": false,
+      "shortname": "",
+      "type": "string"
+    },
+    {
+      "name": "azurerm_public_ip_id",
+      "label": "Azurerm Public Ip Id",
+      "description": "the id for the azurerm_lb_public_ip resource",
+      "group_name": "",
+      "secured": false,
+      "hidden": false,
+      "shortname": "",
+      "type": "string"
+    },
+    {
+      "name": "azurerm_public_ip_address",
+      "label": "Azurerm Public Ip Address",
+      "description": "the ip address for the azurerm_lb_public_ip resource",
+      "group_name": "",
+      "secured": false,
+      "hidden": false,
+      "shortname": "",
+      "type": "string"
+    },
+    {
+      "name": "azurerm_lb_backend_address_pool_id",
+      "label": "Azurerm Lb Backend Address Pool Id",
+      "description": "the id for the azurerm_lb_backend_address_pool resource",
+      "group_name": "",
+      "secured": false,
+      "hidden": false,
+      "shortname": "",
+      "type": "string"
+    }
   ]
 }
