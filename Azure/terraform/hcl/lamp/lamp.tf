@@ -39,7 +39,7 @@ variable "azure_region" {
 
 variable "name_prefix" {
   description = "Prefix of names for Azure resources"
-  default     = "meanstack"
+  default     = "azurelb"
 }
 
 variable "admin_user" {
@@ -54,6 +54,79 @@ variable "admin_user_password" {
 variable "user_public_key" {
   description = "Public SSH key used to connect to the virtual machine"
   default     = "None"
+}
+  
+#########################################################
+# Define the load balancer variables
+#########################################################
+  
+variable "resource_group_name" {
+  description = "(Required) The name of the resource group where the load balancer resources will be placed."
+  default     = "azure_lb-rg"
+}
+
+variable "prefix" {
+  description = "(Required) Default prefix to use with your resource names."
+  default     = "azure_lb"
+}
+
+variable "remote_port" {
+  description = "Protocols to be used for remote vm access. [protocol, backend_port].  Frontend port will be automatically generated starting at 50000 and in the output."
+  default     = {}
+}
+
+variable "lb_port" {
+  description = "Protocols to be used for lb health probes and rules. [frontend_port, protocol, backend_port]"
+  default     = {}
+}
+
+variable "lb_probe_unhealthy_threshold" {
+  description = "Number of times the load balancer health probe has an unsuccessful attempt before considering the endpoint unhealthy."
+  default     = 2
+}
+
+variable "lb_probe_interval" {
+  description = "Interval in seconds the load balancer health probe rule does a check"
+  default     = 5
+}
+
+variable "frontend_name" {
+  description = "(Required) Specifies the name of the frontend ip configuration."
+  default     = "myPublicIP"
+}
+
+variable "public_ip_address_allocation" {
+  description = "(Required) Defines how an IP address is assigned. Options are Static or Dynamic."
+  default     = "static"
+}
+
+variable "tags" {
+  type = "map"
+
+  default = {
+    source = "terraform"
+  }
+}
+
+variable "type" {
+  type        = "string"
+  description = "(Optional) Defined if the loadbalancer is private or public"
+  default     = "public"
+}
+
+variable "frontend_subnet_id" {
+  description = "(Optional) Frontend subnet id to use when in private mode"
+  default     = ""
+}
+
+variable "frontend_private_ip_address" {
+  description = "(Optional) Private ip address to assign to frontend. Use it with type = private"
+  default     = ""
+}
+
+variable "frontend_private_ip_address_allocation" {
+  description = "(Optional) Frontend ip allocation type (Static or Dynamic)"
+  default     = "Dynamic"
 }
 
 
@@ -157,6 +230,83 @@ resource "azurerm_storage_container" "default" {
   resource_group_name   = "${azurerm_resource_group.default.name}"
   storage_account_name  = "${azurerm_storage_account.default.name}"
   container_access_type = "private"
+}
+
+#########################################################
+# Deploy the load balancer machine resource
+#########################################################  
+resource "azurerm_resource_group" "azlb" {
+  name     = "${var.resource_group_name}"
+  location = "${var.location}"
+  tags     = "${var.tags}"
+}
+
+resource "azurerm_public_ip" "azlb" {
+  count                        = "${var.type == "public" ? 1 : 0}"
+  name                         = "${var.prefix}-publicIP"
+  location                     = "${var.location}"
+  resource_group_name          = "${azurerm_resource_group.azlb.name}"
+  public_ip_address_allocation = "${var.public_ip_address_allocation}"
+  tags                         = "${var.tags}"
+}
+
+resource "azurerm_lb" "azlb" {
+  name                = "${var.prefix}-lb"
+  resource_group_name = "${azurerm_resource_group.azlb.name}"
+  location            = "${var.location}"
+  tags                = "${var.tags}"
+
+  frontend_ip_configuration {
+    name                          = "${var.frontend_name}"
+    public_ip_address_id          = "${var.type == "public" ? join("",azurerm_public_ip.azlb.*.id) : ""}"
+    subnet_id                     = "${var.frontend_subnet_id}"
+    private_ip_address            = "${var.frontend_private_ip_address}"
+    private_ip_address_allocation = "${var.frontend_private_ip_address_allocation}"
+  }
+}
+
+resource "azurerm_lb_backend_address_pool" "azlb" {
+  resource_group_name = "${azurerm_resource_group.azlb.name}"
+  loadbalancer_id     = "${azurerm_lb.azlb.id}"
+  name                = "BackEndAddressPool"
+}
+
+resource "azurerm_lb_nat_rule" "azlb" {
+  count                          = "${length(var.remote_port)}"
+  resource_group_name            = "${azurerm_resource_group.azlb.name}"
+  loadbalancer_id                = "${azurerm_lb.azlb.id}"
+  name                           = "VM-${count.index}"
+  protocol                       = "tcp"
+  frontend_port                  = "5000${count.index + 1}"
+  backend_port                   = "${element(var.remote_port["${element(keys(var.remote_port), count.index)}"], 1)}"
+  frontend_ip_configuration_name = "${var.frontend_name}"
+}
+
+resource "azurerm_lb_probe" "azlb" {
+  count               = "${length(var.lb_port)}"
+  resource_group_name = "${azurerm_resource_group.azlb.name}"
+  loadbalancer_id     = "${azurerm_lb.azlb.id}"
+  name                = "${element(keys(var.lb_port), count.index)}"
+  protocol            = "${element(var.lb_port["${element(keys(var.lb_port), count.index)}"], 1)}"
+  port                = "${element(var.lb_port["${element(keys(var.lb_port), count.index)}"], 2)}"
+  interval_in_seconds = "${var.lb_probe_interval}"
+  number_of_probes    = "${var.lb_probe_unhealthy_threshold}"
+}
+
+resource "azurerm_lb_rule" "azlb" {
+  count                          = "${length(var.lb_port)}"
+  resource_group_name            = "${azurerm_resource_group.azlb.name}"
+  loadbalancer_id                = "${azurerm_lb.azlb.id}"
+  name                           = "${element(keys(var.lb_port), count.index)}"
+  protocol                       = "${element(var.lb_port["${element(keys(var.lb_port), count.index)}"], 1)}"
+  frontend_port                  = "${element(var.lb_port["${element(keys(var.lb_port), count.index)}"], 0)}"
+  backend_port                   = "${element(var.lb_port["${element(keys(var.lb_port), count.index)}"], 2)}"
+  frontend_ip_configuration_name = "${var.frontend_name}"
+  enable_floating_ip             = false
+  backend_address_pool_id        = "${azurerm_lb_backend_address_pool.azlb.id}"
+  idle_timeout_in_minutes        = 5
+  probe_id                       = "${element(azurerm_lb_probe.azlb.*.id,count.index)}"
+  depends_on                     = ["azurerm_lb_probe.azlb"]
 }
 
 #########################################################
@@ -429,4 +579,49 @@ output "lamp_sql_service_fqdn" {
 
 output "application_url" {
   value = "http://${azurerm_public_ip.web.ip_address}/test.php"
+}
+
+output "azurerm_resource_group_tags" {
+  description = "the tags provided for the resource group"
+  value       = "${azurerm_resource_group.azlb.tags}"
+}
+
+output "azurerm_resource_group_name" {
+  description = "name of the resource group provisioned"
+  value       = "${azurerm_resource_group.azlb.name}"
+}
+
+output "azurerm_lb_id" {
+  description = "the id for the azurerm_lb resource"
+  value       = "${azurerm_lb.azlb.id}"
+}
+
+output "azurerm_lb_frontend_ip_configuration" {
+  description = "the frontend_ip_configuration for the azurerm_lb resource"
+  value       = "${azurerm_lb.azlb.frontend_ip_configuration}"
+}
+
+output "azurerm_lb_probe_ids" {
+  description = "the ids for the azurerm_lb_probe resources"
+  value       = "${azurerm_lb_probe.azlb.*.id}"
+}
+
+output "azurerm_lb_nat_rule_ids" {
+  description = "the ids for the azurerm_lb_nat_rule resources"
+  value       = "${azurerm_lb_nat_rule.azlb.*.id}"
+}
+
+output "azurerm_public_ip_id" {
+  description = "the id for the azurerm_lb_public_ip resource"
+  value       = "${azurerm_public_ip.azlb.*.id}"
+}
+
+output "azurerm_public_ip_address" {
+  description = "the ip address for the azurerm_lb_public_ip resource"
+  value       = "${azurerm_public_ip.azlb.*.ip_address}"
+}
+
+output "azurerm_lb_backend_address_pool_id" {
+  description = "the id for the azurerm_lb_backend_address_pool resource"
+  value       = "${azurerm_lb_backend_address_pool.azlb.id}"
 }
